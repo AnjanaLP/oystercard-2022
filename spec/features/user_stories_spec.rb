@@ -1,6 +1,7 @@
 describe 'User Stories' do
   let(:oystercard)    { Oystercard.new }
   let(:max_balance)   { Oystercard::MAX_BALANCE }
+  let(:min_balance)   { Oystercard::MIN_BALANCE }
 
   # In order to use public transport
   # As a customer
@@ -53,5 +54,13 @@ describe 'User Stories' do
     oystercard.touch_in
     oystercard.touch_out
     expect(oystercard).not_to be_in_journey
+  end
+
+  # In order to pay for my journey
+  # As a customer
+  # I need to have the minimum amount (£1) for a single journey
+  it 'an oystercard must have a minimum balance to touch in' do
+    message = "Cannot touch in: balance below £#{min_balance}"
+    expect { oystercard.touch_in }.to raise_error message
   end
 end

@@ -3,6 +3,7 @@ require 'oystercard'
 describe Oystercard do
   subject(:oystercard)    { described_class.new }
   let(:max_balance)       { described_class::MAX_BALANCE }
+  let(:min_balance)        { described_class::MIN_BALANCE }
 
   describe '#balance' do
     it 'is initially zero' do
@@ -50,6 +51,15 @@ describe Oystercard do
         oystercard.touch_in
         oystercard.touch_out
         expect(oystercard).not_to be_in_journey
+      end
+    end
+  end
+
+  describe '#touch_in' do
+    context 'when below minimum balance' do
+      it 'raises an error' do
+        message = "Cannot touch in: balance below £#{min_balance}"
+        expect { oystercard.touch_in }.to raise_error message
       end
     end
   end
