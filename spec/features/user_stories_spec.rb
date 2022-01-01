@@ -33,4 +33,25 @@ describe 'User Stories' do
     oystercard.top_up(max_balance)
     expect { oystercard.deduct(10) }.to change { oystercard.balance }.by(-10)
   end
+
+  # In order to get through the barriers
+  # As a customer
+  # I need to touch in and out
+  it 'an oystercard is initially not in a journey' do
+    oystercard.top_up(max_balance)
+    expect(oystercard).not_to be_in_journey
+  end
+
+  it 'a touched in oystercard is in a journey' do
+    oystercard.top_up(max_balance)
+    oystercard.touch_in
+    expect(oystercard).to be_in_journey
+  end
+
+  it 'a touched out oystercard is not in a journey' do
+    oystercard.top_up(max_balance)
+    oystercard.touch_in
+    oystercard.touch_out
+    expect(oystercard).not_to be_in_journey
+  end
 end

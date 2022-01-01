@@ -30,4 +30,27 @@ describe Oystercard do
       expect { oystercard.deduct(10) }.to change { oystercard.balance }.by(-10)
     end
   end
+
+  describe '#in_journey?' do
+    before { oystercard.top_up(max_balance) }
+
+    it 'is initially returns false' do
+      expect(oystercard).not_to be_in_journey
+    end
+
+    context 'when touched in' do
+      it 'returns true' do
+        oystercard.touch_in
+        expect(oystercard).to be_in_journey
+      end
+    end
+
+    context 'when touched out' do
+      it 'returns false' do
+        oystercard.touch_in
+        oystercard.touch_out
+        expect(oystercard).not_to be_in_journey
+      end
+    end
+  end
 end
