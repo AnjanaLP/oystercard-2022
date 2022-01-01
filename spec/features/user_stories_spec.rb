@@ -13,8 +13,8 @@ describe 'User Stories' do
   # As a customer
   # I want to add money to my card
   it 'an oystercard can be topped up to increase the balance' do
-    oystercard.top_up(10)
-    expect(oystercard.balance).to eq(10)
+    oystercard.top_up(max_balance)
+    expect(oystercard.balance).to eq(max_balance)
   end
 
   # In order to protect my money from theft or loss
@@ -24,5 +24,13 @@ describe 'User Stories' do
     oystercard.top_up(max_balance)
     message = "Cannot top up: £#{max_balance} limit exceeded"
     expect{ oystercard.top_up(1) }.to raise_error message
+  end
+
+  # In order to pay for my journey
+  # As a customer
+  # I need my fare deducted from my card
+  it 'an oystercard has the fare deducted from the balance' do
+    oystercard.top_up(max_balance)
+    expect { oystercard.deduct(10) }.to change { oystercard.balance }.by(-10)
   end
 end

@@ -12,6 +12,10 @@ class Oystercard
     increase_balance(amount)
   end
 
+  def deduct(amount)
+    @balance -= amount
+  end
+
   private
 
   def at_max_balance?(amount)

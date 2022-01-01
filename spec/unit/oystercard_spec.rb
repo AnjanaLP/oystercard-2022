@@ -12,7 +12,7 @@ describe Oystercard do
 
   describe '#top_up' do
     it 'increases the balance by the given amount' do
-      expect { oystercard.top_up(10) }.to change { oystercard.balance }.by(10)
+      expect { oystercard.top_up(max_balance) }.to change { oystercard.balance }.by(max_balance)
     end
 
     context 'when maximum balance limit exceeded' do
@@ -21,6 +21,13 @@ describe Oystercard do
         message = "Cannot top up: £#{max_balance} limit exceeded"
         expect{ oystercard.top_up(1) }.to raise_error message
       end
+    end
+  end
+
+  describe '#deduct' do
+    it 'decreases the balance by the given amount' do
+      oystercard.top_up(max_balance)
+      expect { oystercard.deduct(10) }.to change { oystercard.balance }.by(-10)
     end
   end
 end
