@@ -1,7 +1,7 @@
 describe 'User Stories' do
   let(:oystercard)    { Oystercard.new }
   let(:max_balance)   { Oystercard::MAX_BALANCE }
-  let(:min_balance)   { Oystercard::MIN_BALANCE }
+  let(:min_fare)      { Oystercard::MIN_FARE}
 
   # In order to use public transport
   # As a customer
@@ -25,14 +25,6 @@ describe 'User Stories' do
     oystercard.top_up(max_balance)
     message = "Cannot top up: £#{max_balance} limit exceeded"
     expect{ oystercard.top_up(1) }.to raise_error message
-  end
-
-  # In order to pay for my journey
-  # As a customer
-  # I need my fare deducted from my card
-  it 'an oystercard has the fare deducted from the balance' do
-    oystercard.top_up(max_balance)
-    expect { oystercard.deduct(10) }.to change { oystercard.balance }.by(-10)
   end
 
   # In order to get through the barriers
@@ -59,8 +51,17 @@ describe 'User Stories' do
   # In order to pay for my journey
   # As a customer
   # I need to have the minimum amount (£1) for a single journey
-  it 'an oystercard must have a minimum balance to touch in' do
-    message = "Cannot touch in: balance below £#{min_balance}"
+  it 'an oystercard must have a balance of the minimum fare to touch in' do
+    message = "Cannot touch in: balance below £#{min_fare}"
     expect { oystercard.touch_in }.to raise_error message
+  end
+
+  # In order to pay for my journey
+  # As a customer
+  # When my journey is complete, I need the correct amount deducted from my card
+  it 'the fare is deducted from an oystercard on touch out' do
+    oystercard.top_up(max_balance)
+    oystercard.touch_in
+    expect { oystercard.touch_out }.to change { oystercard.balance }.by(-min_fare)
   end
 end
