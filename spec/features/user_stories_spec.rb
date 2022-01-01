@@ -93,4 +93,12 @@ describe 'User Stories' do
     expect(oystercard.journeys).to eq [ { entry_station: :angel, exit_station: :euston },
                                         { entry_station: :baker_street, exit_station: :marylebone } ]
   end
+
+  # In order to know how far I have travelled
+  # As a customer
+  # I want to know what zone a station is in
+  it 'a station knows what zone it is in' do
+    station = Station.new(name: :angel, zone: 1)
+    expect(station.zone).to eq 1
+  end
 end
