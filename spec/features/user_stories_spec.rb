@@ -1,7 +1,9 @@
 describe 'User Stories' do
   let(:oystercard)    { Oystercard.new }
+  let(:angel)         { Station.new( name: :angel, zone: 1) }
   let(:max_balance)   { Oystercard::MAX_BALANCE }
-  let(:min_fare)      { Oystercard::MIN_FARE}
+  let(:min_fare)      { Journey::MIN_FARE }
+  let(:penalty_fare)  { Journey::PENALTY_FARE }
 
   # In order to use public transport
   # As a customer
@@ -30,22 +32,14 @@ describe 'User Stories' do
   # In order to get through the barriers
   # As a customer
   # I need to touch in and out
-  it 'an oystercard is initially not in a journey' do
+  it 'an oystercard can be touched in' do
     oystercard.top_up(max_balance)
-    expect(oystercard).not_to be_in_journey
+    expect{ oystercard.touch_in(:angel) }.not_to raise_error
   end
 
-  it 'a touched in oystercard is in a journey' do
+  it 'an oystercard can be touched out' do
     oystercard.top_up(max_balance)
-    oystercard.touch_in(:angel)
-    expect(oystercard).to be_in_journey
-  end
-
-  it 'a touched out oystercard is not in a journey' do
-    oystercard.top_up(max_balance)
-    oystercard.touch_in(:angel)
-    oystercard.touch_out(:euston)
-    expect(oystercard).not_to be_in_journey
+    expect{ oystercard.touch_out(:angel) }.not_to raise_error
   end
 
   # In order to pay for my journey
@@ -59,10 +53,13 @@ describe 'User Stories' do
   # In order to pay for my journey
   # As a customer
   # When my journey is complete, I need the correct amount deducted from my card
-  it 'the fare is deducted from an oystercard on touch out' do
-    oystercard.top_up(max_balance)
-    oystercard.touch_in(:angel)
-    expect { oystercard.touch_out(:euston) }.to change { oystercard.balance }.by(-min_fare)
+  context 'when the journey is complete' do
+    it 'the minimum fare is deducted on touch out' do
+      oystercard.top_up(10)
+      oystercard.touch_in(:angel)
+      oystercard.touch_out(:euston)
+      expect(oystercard.balance).to eq 9
+    end
   end
 
   # In order to pay for my journey
@@ -71,14 +68,8 @@ describe 'User Stories' do
   it 'an oystercard stores the entry station on touch in' do
     oystercard.top_up(max_balance)
     oystercard.touch_in(:angel)
-    expect(oystercard.entry_station).to eq :angel
-  end
-
-  it 'an oystercard forgets the entry station on touch out' do
-    oystercard.top_up(max_balance)
-    oystercard.touch_in(:angel)
-    oystercard.touch_out(:euston)
-    expect(oystercard.entry_station).to be_nil
+    last_journey = oystercard.journeys.last
+    expect(last_journey.entry_station).to eq :angel
   end
 
   # In order to know where I have been
@@ -89,9 +80,17 @@ describe 'User Stories' do
     oystercard.touch_in(:angel)
     oystercard.touch_out(:euston)
     oystercard.touch_in(:baker_street)
-    oystercard.touch_out(:marylebone)
-    expect(oystercard.journeys).to eq [ { entry_station: :angel, exit_station: :euston },
-                                        { entry_station: :baker_street, exit_station: :marylebone } ]
+    oystercard.touch_in(:marylebone)
+    oystercard.touch_out(:heathrow)
+    oystercard.touch_out(:farringdon)
+    expect(oystercard.journeys[0].entry_station).to eq :angel
+    expect(oystercard.journeys[0].exit_station).to eq :euston
+    expect(oystercard.journeys[1].entry_station).to eq :baker_street
+    expect(oystercard.journeys[1].exit_station).to eq nil
+    expect(oystercard.journeys[2].entry_station).to eq :marylebone
+    expect(oystercard.journeys[2].exit_station).to eq :heathrow
+    expect(oystercard.journeys[3].entry_station).to eq nil
+    expect(oystercard.journeys[3].exit_station).to eq :farringdon
   end
 
   # In order to know how far I have travelled
@@ -100,5 +99,22 @@ describe 'User Stories' do
   it 'a station knows what zone it is in' do
     station = Station.new(name: :angel, zone: 1)
     expect(station.zone).to eq 1
+  end
+
+  # In order to be charged correctly
+  # As a customer
+  # I need a penalty charge deducted if I fail to touch in or out
+  context 'when the oystercard is not touched out' do
+    it 'the penalty fare is deducted' do
+      oystercard.top_up(max_balance)
+      expect { oystercard.touch_in(:angel) }.to change { oystercard.balance }.by -6
+    end
+  end
+
+  context 'when the oystercard is not touched in' do
+    it 'the penalty fare is deducted' do
+      oystercard.top_up(max_balance)
+      expect { oystercard.touch_out(:angel) }.to change { oystercard.balance }.by -6
+    end
   end
 end

@@ -1,11 +1,13 @@
 require 'oystercard'
 
 describe Oystercard do
-  subject(:oystercard)    { described_class.new }
-  let(:entry_station)     { double :station }
-  let(:exit_station)      { double :station }
-  let(:max_balance)       { described_class::MAX_BALANCE }
-  let(:min_fare)          { described_class::MIN_FARE }
+  subject(:oystercard)    { described_class.new(journey_class) }
+  let(:journey_class)     { double :journey_class, new: journey }
+  let(:journey)           { double :journey, fare: 1, complete?: nil, end: nil }
+  let(:station)           { double :station }
+  let(:max_balance)       { Oystercard::MAX_BALANCE }
+  let(:min_fare)          { Journey::MIN_FARE }
+  let(:penalty_fare)      { Journey::PENALTY_FARE }
 
   describe '#balance' do
     it 'is initially zero' do
@@ -27,40 +29,31 @@ describe Oystercard do
     end
   end
 
-  describe '#in_journey?' do
-    before { oystercard.top_up(max_balance) }
-
-    it 'is initially returns false' do
-      expect(oystercard).not_to be_in_journey
-    end
-
-    context 'when touched in' do
-      it 'returns true' do
-        oystercard.touch_in(entry_station)
-        expect(oystercard).to be_in_journey
-      end
-    end
-
-    context 'when touched out' do
-      it 'returns false' do
-        oystercard.touch_in(entry_station)
-        oystercard.touch_out(exit_station)
-        expect(oystercard).not_to be_in_journey
-      end
-    end
-  end
-
   describe '#touch_in' do
-    it 'stores the entry station' do
-      oystercard.top_up(max_balance)
-      oystercard.touch_in(entry_station)
-      expect(oystercard.entry_station).to eq entry_station
-    end
-
     context 'when balance is below minimum fare' do
       it 'raises an error' do
         message = "Cannot touch in: balance below £#{min_fare}"
-        expect { oystercard.touch_in(entry_station) }.to raise_error message
+        expect { oystercard.touch_in(station) }.to raise_error message
+      end
+    end
+
+    context 'when sufficient balance' do
+      before do
+        oystercard.top_up(max_balance)
+      end
+
+      it 'creates a new journey instance' do
+        expect(journey_class).to receive(:new).with(station)
+        oystercard.touch_in(station)
+      end
+
+      it 'adds the current journey to the journeys collection' do
+        oystercard.touch_in(station)
+        expect(oystercard.journeys).not_to be_empty
+      end
+
+      it 'deducts the penalty fare by default' do
+        expect { oystercard.touch_in(station) }.to change { oystercard.balance }.by(-penalty_fare)
       end
     end
   end
@@ -68,21 +61,47 @@ describe Oystercard do
   describe '#touch_out' do
     before do
       oystercard.top_up(max_balance)
-      oystercard.touch_in(entry_station)
     end
 
-    it 'deducts the fare from the balance' do
-      expect { oystercard.touch_out(exit_station) }.to change { oystercard.balance }.by(-min_fare)
+    context 'when not touched in during the current journey' do
+      it 'deducts the penalty fare' do
+        allow(journey).to receive(:fare).and_return 6
+        expect{ oystercard.touch_out(station) }.to change { oystercard.balance }.by(-penalty_fare)
+
+      end
+
+      it 'adds the current journey to the journeys collection' do
+        oystercard.touch_out(station)
+        number_of_journeys = oystercard.journeys.count
+        expect(number_of_journeys).to eq 1
+      end
     end
 
-    it 'adds a completed journey to the journeys collection' do
-      oystercard.touch_out(exit_station)
-      expect(oystercard.journeys).to include({ entry_station: entry_station, exit_station: exit_station})
+    context 'when touched in during the current journey' do
+      before do
+        oystercard.touch_in(station)
+        oystercard.touch_out(station)
+      end
+
+      it 'reimburses the penalty fare and deducts the minimum fare' do
+        allow(journey).to receive(:fare).and_return 1
+        expect(oystercard.balance).to eq 89
+      end
+
+      it 'does not create a new journey instance' do
+        number_of_journeys = oystercard.journeys.count
+        expect(number_of_journeys).to eq 1
+      end
     end
 
-    it 'sets the entry station to nil' do
-      oystercard.touch_out(exit_station)
-      expect(oystercard.entry_station).to be_nil
+    it 'calls the end method on the journey instance' do
+      expect(journey).to receive(:end).with(station)
+      oystercard.touch_out(station)
+    end
+
+    it 'sets the current_journey to nil' do
+      oystercard.touch_out(station)
+      expect(oystercard.current_journey).to be_nil
     end
   end
 
