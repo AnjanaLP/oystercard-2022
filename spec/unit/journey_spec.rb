@@ -32,32 +32,46 @@ describe Journey do
     end
   end
 
-  describe '#fare' do
+  describe '#complete?' do
     context 'given both an entry and exit station' do
-      it 'returns the minimum fare' do
+      it 'returns true' do
         journey.end(station)
-        expect(journey.fare).to eq min_fare
+        expect(journey).to be_complete
       end
     end
 
     context 'given an entry but no exit station' do
-      it 'returns the penalty fare' do
-        expect(journey.fare).to eq penalty_fare
+      it 'returns false' do
+        expect(journey).not_to be_complete
       end
     end
 
     context 'given an exit but no entry station' do
       subject(:journey)   { described_class.new }
-      it 'returns the penalty fare' do
-        journey.end(station)
-        expect(journey.fare).to eq penalty_fare
+      it 'returns false' do
+        expect(journey).not_to be_complete
       end
     end
 
     context 'given neither an entry nor an exit station' do
       subject(:journey)   { described_class.new }
-      it 'returns the penalty_fare' do
-        expect(journey.fare).to eq penalty_fare
+      it 'returns false' do
+        expect(journey).not_to be_complete
+      end
+    end
+  end
+
+  describe '#fare' do
+    context 'when the journey is complete' do
+      it 'returns the minimum fare' do
+        journey.end(station)
+        expect(journey.fare).to eq described_class::MIN_FARE
+      end
+    end
+
+    context 'when the journey is incomplete' do
+      it 'returns the penalty fare' do
+        expect(journey.fare).to eq described_class::PENALTY_FARE
       end
     end
   end

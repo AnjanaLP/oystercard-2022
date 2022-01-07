@@ -2,7 +2,7 @@ require 'journey_log'
 
 describe JourneyLog do
   subject(:journey_log)   { described_class.new(journey_class) }
-  let(:journey_class)     { double :journey_class, new: journey }
+  let(:journey_class)     { double :journey_class, new: journey  }
   let(:journey)           { double :journey, fare: 6 }
   let(:station)           { double :station }
 
@@ -13,7 +13,7 @@ describe JourneyLog do
   end
 
   describe '#start' do
-    it 'calls the new method on the Journey class' do
+    it 'calls the new method on the Journey class and passes it the entry station' do
       expect(journey_class).to receive(:new).with(station)
       journey_log.start(station)
     end
@@ -72,5 +72,24 @@ describe JourneyLog do
     end
   end
 
+  describe '#refund_amount' do
+    before { allow(journey).to receive(:end).and_return journey }
 
+    context 'when the journey_log records a complete journey' do
+      it 'there is a refund amount' do
+        allow(journey).to receive(:complete?).and_return true
+        journey_log.start(station)
+        journey_log.finish(station)
+        expect(journey_log.refund_amount).to eq described_class::REFUND
+      end
+    end
+
+    context 'when the journey_log records an incomplete journey' do
+      it 'there is no refund amount' do
+        allow(journey).to receive(:complete?).and_return false
+        journey_log.finish(station)
+        expect(journey_log.refund_amount).to eq 0
+      end
+    end
+  end
 end
