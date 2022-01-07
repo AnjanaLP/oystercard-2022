@@ -1,6 +1,7 @@
 require_relative 'journey'
 
 class JourneyLog
+  REFUND = 6
 
   attr_reader :current_journey
 
@@ -12,7 +13,7 @@ class JourneyLog
   def start(station)
     set_current_journey(station)
     add(current_journey)
-    outstanding_charges
+    current_journey.fare
   end
 
   def finish(station)
@@ -22,8 +23,8 @@ class JourneyLog
     last_journey.fare
   end
 
-  def outstanding_charges
-    last_journey.default_charge
+  def refund_amount
+    last_journey.complete? ? REFUND : 0
   end
 
   def journeys
@@ -32,11 +33,13 @@ class JourneyLog
 
   private
 
+  attr_reader :journey_class
+
   def set_current_journey(station = nil)
     if station
-      @current_journey = @journey_class.new(station)
+      @current_journey = journey_class.new(station)
     else
-      @current_journey ||= @journey_class.new
+      @current_journey ||= journey_class.new
     end
   end
 

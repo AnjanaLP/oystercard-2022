@@ -3,7 +3,7 @@ require 'journey_log'
 describe JourneyLog do
   subject(:journey_log)   { described_class.new(journey_class) }
   let(:journey_class)     { double :journey_class, new: journey }
-  let(:journey)           { double :journey, default_charge: 6, fare: 6 }
+  let(:journey)           { double :journey, fare: 6 }
   let(:station)           { double :station }
 
   describe '#journeys' do
@@ -23,8 +23,8 @@ describe JourneyLog do
       expect(journey_log.journeys).to include journey
     end
 
-    it 'returns the entry fare' do
-      expect(journey_log.start(station)).to eq journey.default_charge
+    it 'returns the current journey fare' do
+      expect(journey_log.start(station)).to eq journey.fare
     end
   end
 
@@ -72,11 +72,5 @@ describe JourneyLog do
     end
   end
 
-  describe '#outstanding_charges' do
-    it 'calls the default_charges method on the last journey in the journeys collection' do
-      last_journey = journey_log.journeys.last
-      expect(last_journey).to receive(:default_charge)
-      journey_log.outstanding_charges
-    end
-  end
+
 end

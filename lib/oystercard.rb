@@ -23,7 +23,7 @@ class Oystercard
 
   def touch_out(station)
     deduct(journey_log.finish(station))
-    top_up(journey_log.outstanding_charges)
+    top_up(journey_log.refund_amount)
   end
 
   private

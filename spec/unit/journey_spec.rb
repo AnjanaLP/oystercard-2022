@@ -27,12 +27,6 @@ describe Journey do
       expect(journey.exit_station).to eq station
     end
 
-    context 'when entry station' do
-      it 'does not reset the default charge' do
-        expect { journey.end(station) }.not_to change{ journey.default_charge }
-      end
-    end
-
     it 'returns itself' do
       expect(journey.end(station)).to eq journey
     end
@@ -63,21 +57,6 @@ describe Journey do
     context 'given neither an entry nor an exit station' do
       subject(:journey)   { described_class.new }
       it 'returns the penalty_fare' do
-        expect(journey.fare).to eq penalty_fare
-      end
-    end
-  end
-
-  describe '#fare' do
-    context 'when the journey is complete' do
-      it 'returns the minimum fare' do
-        journey.end(station)
-        expect(journey.fare).to eq min_fare
-      end
-    end
-
-    context 'when the journey is incomplete' do
-      it 'returns the penalty fare' do
         expect(journey.fare).to eq penalty_fare
       end
     end

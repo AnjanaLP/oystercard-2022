@@ -2,7 +2,7 @@ require 'oystercard'
 
 describe Oystercard do
   subject(:oystercard)    { described_class.new(journey_log) }
-  let(:journey_log)       { double :journey_log, start: penalty_fare, outstanding_charges: penalty_fare, finish: penalty_fare }
+  let(:journey_log)       { double :journey_log, start: penalty_fare, refund_amount: penalty_fare, finish: penalty_fare }
   let(:journey)           { double :journey }
   let(:station)           { double :station }
   let(:max_balance)       { described_class::MAX_BALANCE }
@@ -72,8 +72,8 @@ describe Oystercard do
     end
 
     context 'when journey is incomplete' do
-      it 'deducts the penalty fare' do
-        allow(journey_log).to receive(:outstanding_charges).and_return(0)
+      it 'refunds nothing and deducts the penalty fare' do
+        allow(journey_log).to receive(:refund_amount).and_return(0)
         expect { oystercard.touch_out(station) }.to change { oystercard.balance }.by -penalty_fare
       end
     end
