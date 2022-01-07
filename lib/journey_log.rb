@@ -36,11 +36,7 @@ class JourneyLog
   attr_reader :journey_class
 
   def set_current_journey(station = nil)
-    if station
-      @current_journey = journey_class.new(station)
-    else
-      @current_journey ||= journey_class.new
-    end
+    station ? @current_journey = journey_class.new(station) : @current_journey ||= journey_class.new
   end
 
   def add(journey)
