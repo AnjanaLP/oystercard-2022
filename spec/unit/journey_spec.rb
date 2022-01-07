@@ -3,6 +3,8 @@ require 'journey'
 describe Journey do
   subject(:journey)   { described_class.new(station) }
   let(:station)       { double :station }
+  let(:min_fare)      { described_class::MIN_FARE }
+  let(:penalty_fare)  { described_class::PENALTY_FARE }
 
   describe '#entry_station' do
     context 'when given a station on initialize' do
@@ -25,37 +27,43 @@ describe Journey do
       expect(journey.exit_station).to eq station
     end
 
+    context 'when entry station' do
+      it 'does not reset the default charge' do
+        expect { journey.end(station) }.not_to change{ journey.default_charge }
+      end
+    end
+
     it 'returns itself' do
       expect(journey.end(station)).to eq journey
     end
   end
 
-  describe '#complete?' do
+  describe '#fare' do
     context 'given both an entry and exit station' do
-      it 'returns true' do
+      it 'returns the minimum fare' do
         journey.end(station)
-        expect(journey).to be_complete
+        expect(journey.fare).to eq min_fare
       end
     end
 
     context 'given an entry but no exit station' do
-      it 'returns false' do
-        expect(journey).not_to be_complete
+      it 'returns the penalty fare' do
+        expect(journey.fare).to eq penalty_fare
       end
     end
 
     context 'given an exit but no entry station' do
       subject(:journey)   { described_class.new }
-      it 'returns false' do
+      it 'returns the penalty fare' do
         journey.end(station)
-        expect(journey).not_to be_complete
+        expect(journey.fare).to eq penalty_fare
       end
     end
 
     context 'given neither an entry nor an exit station' do
       subject(:journey)   { described_class.new }
-      it 'returns false' do
-        expect(journey).not_to be_complete
+      it 'returns the penalty_fare' do
+        expect(journey.fare).to eq penalty_fare
       end
     end
   end
@@ -64,13 +72,13 @@ describe Journey do
     context 'when the journey is complete' do
       it 'returns the minimum fare' do
         journey.end(station)
-        expect(journey.fare).to eq described_class::MIN_FARE
+        expect(journey.fare).to eq min_fare
       end
     end
 
     context 'when the journey is incomplete' do
       it 'returns the penalty fare' do
-        expect(journey.fare).to eq described_class::PENALTY_FARE
+        expect(journey.fare).to eq penalty_fare
       end
     end
   end

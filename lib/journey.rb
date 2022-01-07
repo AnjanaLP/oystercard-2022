@@ -2,10 +2,11 @@ class Journey
   MIN_FARE = 1
   PENALTY_FARE = 6
 
-  attr_reader :entry_station, :exit_station
+  attr_reader :entry_station, :exit_station, :default_charge
 
   def initialize(station = nil)
     @entry_station = station
+    @default_charge = PENALTY_FARE
   end
 
   def end(station)
@@ -13,11 +14,22 @@ class Journey
     self
   end
 
-  def complete?
-    entry_station && exit_station
+  def fare
+    if complete?
+      MIN_FARE
+    else
+      reset_default_charge
+      PENALTY_FARE
+    end
   end
 
-  def fare
-    complete? ? MIN_FARE : PENALTY_FARE
+  private
+
+  def reset_default_charge
+    @default_charge = 0
+  end
+
+  def complete?
+    entry_station && exit_station
   end
 end
