@@ -1,6 +1,6 @@
 describe 'User Stories' do
   let(:oystercard)    { Oystercard.new }
-  let(:entry_station) { Station.new( name: :angel, zone: 1) }
+  let(:entry_station) { Station.new( name: :angel, zone: 2) }
   let(:exit_station)  { Station.new( name: :euston, zone: 2) }
   let(:max_balance)   { Oystercard::MAX_BALANCE }
   let(:min_balance)   { Oystercard::MIN_BALANCE }
@@ -47,7 +47,7 @@ describe 'User Stories' do
   # As a customer
   # I need to have the minimum amount for a single journey
   it 'an oystercard must have a minimum balance to touch in' do
-    message = "Cannot touch in: balance below £#{min_balance}"
+    message = "Cannot touch in: balance below £#{min_balance} minimum"
     expect { oystercard.touch_in(entry_station) }.to raise_error message
   end
 
@@ -87,7 +87,7 @@ describe 'User Stories' do
   # As a customer
   # I want to know what zone a station is in
   it 'a station knows what zone it is in' do
-    expect(entry_station.zone).to eq 1
+    expect(entry_station.zone).to eq 2
   end
 
   # In order to be charged correctly
@@ -112,11 +112,26 @@ describe 'User Stories' do
   # As a customer
   # I need to pay for my journey when it's complete
   context 'when the journey is complete' do
-    it 'the penalty from touch in is refunded and minimum fare is charged' do
-      oystercard.top_up(max_balance)
-      oystercard.touch_in(entry_station)
-      refund_and_fare = penalty_fare - min_fare
-      expect { oystercard.touch_out(exit_station) }.to change { oystercard.balance }.by(refund_and_fare)
+    context 'when no zone boundaries crossed' do
+      it 'the penalty from touch in is refunded and minimum fare is charged' do
+        oystercard.top_up(max_balance)
+        oystercard.touch_in(entry_station)
+        refund_and_fare = penalty_fare - min_fare
+        expect { oystercard.touch_out(exit_station) }.to change { oystercard.balance }.by(refund_and_fare)
+      end
+    end
+
+    # In order to be charged the correct amount
+    # As a customer
+    # I need to have the correct fare calculated
+    context 'when zone boundaries are crossed' do
+      it 'the penalty from touch in is refunded and a fare dependent on zones crossed is charged' do
+        zone_4_station = Station.new(name: :heathrow, zone: 4)
+        oystercard.top_up(max_balance)
+        oystercard.touch_in(entry_station)
+        refund_and_fare = penalty_fare - 3
+        expect { oystercard.touch_out(zone_4_station) }.to change { oystercard.balance }.by(refund_and_fare)
+      end
     end
   end
 end

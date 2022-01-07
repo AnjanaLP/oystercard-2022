@@ -1,4 +1,5 @@
 require_relative 'journey_log'
+require_relative 'station'
 
 class Oystercard
   MAX_BALANCE = 90
@@ -17,7 +18,7 @@ class Oystercard
   end
 
   def touch_in(station)
-    raise "Cannot touch in: balance below £#{MIN_BALANCE}" if insufficent_balance?
+    raise "Cannot touch in: balance below £#{MIN_BALANCE} minimum" if insufficent_balance?
     deduct(journey_log.start(station))
   end
 

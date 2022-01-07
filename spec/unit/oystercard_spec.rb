@@ -33,7 +33,7 @@ describe Oystercard do
   describe '#touch_in' do
     context 'when balance is below the minimum' do
       it 'raises an error' do
-        message = "Cannot touch in: balance below £#{min_balance}"
+        message = "Cannot touch in: balance below £#{min_balance} minimum"
         expect { oystercard.touch_in(station) }.to raise_error message
       end
     end
