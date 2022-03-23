@@ -80,8 +80,7 @@ $ rspec
 - SimpleCov
 
 ## Code example
-```
-$ irb
+```ruby
 3.1.0 :001 > require './lib/Oystercard'
  => true
 3.1.0 :002 > oystercard = Oystercard.new
@@ -111,20 +110,19 @@ Cannot top up: £90 limit exceeded (RuntimeError)
 3.1.0 :014 > oystercard.touch_out(Station.new(name: :heathrow, zone: 5))
  => 39
 3.1.0 :015 > journey_log = oystercard.journey_log
- => #<JourneyLog:0x0000000104901b90...
-3.1.0 :016 > journeys = journey_log.journeys
- => [#<Journey:0x00000001048d0590 ...                                                                     
-3.1.0 :017 > journeys
- => [#<Journey:0x00000001048d0590                                                                        
-      @entry_station=#<Station:0x00000001048d0978 @name=:euston, @zone=1>,                               
-      @exit_station=#<Station:0x0000000104bb8c30 @name=:ealing, @zone=3>>,                               
-     #<Journey:0x0000000104bc1dd0                                                                        
-      @entry_station=nil,                                                 
-      @exit_station=#<Station:0x0000000104bc1e48 @name=:aldgate, @zone=1>>,
-     #<Journey:0x0000000104ab27a0                                       
-      @entry_station=#<Station:0x0000000104ab27c8 @name=:farringdon, @zone=1>,
-      @exit_station=nil>,                                               
-     #<Journey:0x0000000104bd8120                                       
-      @entry_station=#<Station:0x0000000104bd8148 @name=:hounslow, @zone=5>,
-      @exit_station=#<Station:0x0000000104bcbab0 @name=:heathrow, @zone=5>>]
+ => #<JourneyLog:0x0000000104901b90...                                                                   
+3.1.0 :016 > journey_log.journeys
+ =>
+ [#<Journey:0x00000001048d0590                                                                        
+ @entry_station=<Station:0x00000001048d0978 @name=:euston, @zone=1>,                               
+ @exit_station=<Station:0x0000000104bb8c30 @name=:ealing, @zone=3>>,                               
+ #<Journey:0x0000000104bc1dd0                                                                        
+ @entry_station=nil,                                                 
+ @exit_station=<Station:0x0000000104bc1e48 @name=:aldgate, @zone=1>>,
+ #<Journey:0x0000000104ab27a0                                       
+ @entry_station=<Station:0x0000000104ab27c8 @name=:farringdon, @zone=1>,
+ @exit_station=nil>,                                               
+ #<Journey:0x0000000104bd8120                                       
+ @entry_station=<Station:0x0000000104bd8148 @name=:hounslow, @zone=5>,
+ @exit_station=<Station:0x0000000104bcbab0 @name=:heathrow, @zone=5>>]
  ```                                                                     
